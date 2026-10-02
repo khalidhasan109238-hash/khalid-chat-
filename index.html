@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B6B4F">
+<title>Khalid Chat</title>
+<style>
+:root{--bg:#F3FAF6;--card:#fff;--ink:#0E2A20;--sub:#5B7468;--line:#DCEBE3;--em:#0B6B4F;--dk:#052E22;--gold:#D4AF37;--err:#B3261E}
+:root[data-theme=dark]{--bg:#07130E;--card:#0F211A;--ink:#E7F3EC;--sub:#8FAA9C;--line:#1B3329;--em:#2FA67C;--dk:#031A12;--err:#F2918B}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,"Noto Sans Bengali","Segoe UI",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:16px;line-height:1.5}
+button,input,textarea,select{font:inherit;color:inherit}
+.hide{display:none!important}
+.screen{min-height:100vh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 20px env(safe-area-inset-bottom)}
+#splash{background:var(--dk);color:#fff;align-items:center;justify-content:center;text-align:center;position:fixed;inset:0;z-index:9}
+.k{width:96px;height:96px;border-radius:28px;background:linear-gradient(145deg,#0B6B4F,#052E22);border:2px solid var(--gold);display:grid;place-items:center;font-size:56px;font-weight:800;color:var(--gold);box-shadow:0 10px 30px #0006}
+#splash .k{animation:pop .9s ease both}
+@keyframes pop{from{transform:scale(.6) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+#splash h1{margin-top:20px;font-size:32px;letter-spacing:.5px}
+#splash p{color:var(--gold);margin-top:6px}
+.btn{border:0;border-radius:14px;padding:14px 18px;min-height:48px;background:var(--em);color:#fff;font-weight:700;cursor:pointer;width:100%}
+.btn.ghost{background:transparent;color:var(--em);border:1.5px solid var(--em)}
+.btn.link{background:none;color:var(--em);min-height:44px;width:auto;padding:8px}
+.btn:disabled{opacity:.6}
+.field{display:block;margin-bottom:14px}
+.field span{display:block;font-size:14px;color:var(--sub);margin-bottom:4px}
+.field input,.field textarea,.field select{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);min-height:48px}
+.field input:focus,.field textarea:focus,.field select:focus,.btn:focus-visible,.tab:focus-visible{outline:3px solid var(--gold);outline-offset:1px}
+.msg{min-height:22px;font-size:14px;margin:6px 0 10px}
+.msg.err{color:var(--err)}.msg.ok{color:var(--em)}
+#onb{justify-content:space-between;padding-top:48px;padding-bottom:28px}
+.slide{text-align:center;margin-top:12vh}
+.slide .k{margin:0 auto 28px}
+.slide h2{font-size:26px}.slide p{color:var(--sub);margin-top:10px;max-width:30ch;margin-inline:auto}
+.dots{display:flex;gap:8px;justify-content:center;margin:18px 0}
+.dots i{width:8px;height:8px;border-radius:8px;background:var(--line)}.dots i.on{width:24px;background:var(--gold)}
+#auth{justify-content:center;max-width:440px;margin:auto;width:100%}
+#auth .k{width:72px;height:72px;font-size:40px;border-radius:22px;margin:0 auto 14px}
+#auth h2{text-align:center;margin-bottom:18px}
+header.top{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 12px) 18px 12px;background:var(--dk);color:#fff}
+header.top .k{width:38px;height:38px;font-size:22px;border-radius:12px;border-width:1.5px;box-shadow:none}
+header.top b{font-size:19px}
+main{padding:18px;padding-bottom:96px;max-width:640px;margin:auto}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tab{flex:1;border:0;background:none;padding:9px 2px;min-height:56px;font-size:12px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.tab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current=page]{color:var(--em);font-weight:700}
+.empty{text-align:center;padding:56px 12px;color:var(--sub)}
+.empty h3{color:var(--ink);margin-bottom:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px}
+.avatar{width:92px;height:92px;border-radius:50%;background:linear-gradient(145deg,var(--em),var(--dk));color:var(--gold);display:grid;place-items:center;font-size:40px;font-weight:800;margin:0 auto 10px;border:3px solid var(--gold)}
+.prof{text-align:center}.prof h2{font-size:22px}.prof .un{color:var(--sub)}.prof .bio{margin-top:8px}
+.card h3{font-size:16px;margin-bottom:10px}
+.note{font-size:13px;color:var(--sub)}
+@media (prefers-reduced-motion:reduce){#splash .k{animation:none}}
+</style>
+</head>
+<body>
+
+<div id="splash" class="screen"><div class="k">K</div><h1>Khalid Chat</h1><p data-t="tag"></p></div>
+
+<section id="onb" class="screen hide">
+  <div><div class="slide"><div class="k">K</div><h2 id="oh"></h2><p id="op"></p></div><div class="dots" id="dots"></div></div>
+  <div><button class="btn" id="onext"></button><button class="btn link" id="oskip" style="display:block;margin:6px auto 0"></button></div>
+</section>
+
+<section id="auth" class="screen hide">
+  <div class="k">K</div>
+  <h2 id="ah"></h2>
+  <label class="field" id="fn"><span data-t="name"></span><input id="name" autocomplete="name"></label>
+  <label class="field" id="fu"><span data-t="username"></span><input id="uname" autocapitalize="none" autocomplete="username" placeholder="khalid"></label>
+  <label class="field"><span data-t="email"></span><input id="email" type="email" autocomplete="email"></label>
+  <label class="field" id="fp"><span data-t="password"></span><input id="pass" type="password" autocomplete="current-password"></label>
+  <div class="msg" id="amsg" role="alert"></div>
+  <button class="btn" id="asubmit"></button>
+  <div style="display:flex;justify-content:space-between;margin-top:8px">
+    <button class="btn link" id="aswitch"></button><button class="btn link" id="areset"></button>
+  </div>
+</section>
+
+<div id="app" class="hide">
+  <header class="top"><div class="k">K</div><b id="title">Khalid Chat</b></header>
+  <main id="view"></main>
+  <nav id="nav"></nav>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import{getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,sendPasswordResetEmail,updateProfile,deleteUser}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import{getFirestore,doc,getDoc,setDoc,updateDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyDb7fKfVUOaO8fch1RN-S7L9KnEXXX0ugM",
+  authDomain:"khalid-chat-c4c56.firebaseapp.com",
+  projectId:"khalid-chat-c4c56",
+  storageBucket:"khalid-chat-c4c56.firebasestorage.app",
+  messagingSenderId:"412655072692",
+  appId:"1:412655072692:web:eb7d992d6fa1aecb26eee1"
+};
+const fb=initializeApp(firebaseConfig),auth=getAuth(fb),db=getFirestore(fb);
+
+const L={
+en:{tag:"Connect. Chat. Understand.",name:"Display name",username:"Username",email:"Email",password:"Password",
+ o:[["Welcome to Khalid Chat","Your private place to talk."],["Chat with people you care about.","Friends and groups, in one calm space."],["Meet your AI Assistant.","Khalid AI helps you write, translate and think."],["Private. Simple. Powerful.","You decide who sees what."]],
+ next:"Next",start:"Get started",skip:"Skip",login:"Log in",register:"Create account",toReg:"New here? Create account",toLog:"Have an account? Log in",reset:"Forgot password?",
+ resetSent:"Reset link sent. Check your email.",needEmail:"Enter your email first.",needAll:"Fill in all fields.",badUser:"Username: 3–20 letters, numbers or _.",taken:"That username is taken.",
+ tabs:["Home","Chats","Contacts","AI","Profile"],
+ eh:["No conversations yet","Messaging arrives in the next version."],ec:["No friends yet","Friend requests arrive in the next version."],ea:["Khalid AI","The AI assistant arrives in a later version."],
+ edit:"Edit profile",bio:"Bio",save:"Save changes",saved:"Saved",theme:"Appearance",light:"Light",dark:"Dark",system:"System default",lang:"Language",logout:"Log out",
+ joined:"Joined",settings:"Settings",noBio:"No bio yet.",
+ errs:{"auth/invalid-credential":"Wrong email or password.","auth/invalid-email":"That email looks wrong.","auth/email-already-in-use":"This email already has an account.","auth/weak-password":"Password needs at least 6 characters.","auth/network-request-failed":"No internet. Check your connection.","auth/too-many-requests":"Too many tries. Wait a minute and try again.","auth/user-not-found":"No account with this email."},
+ generic:"Something went wrong. Please try again."},
+bn:{tag:"Connect. Chat. Understand.",name:"প্রদর্শিত নাম",username:"ইউজারনেম",email:"ইমেইল",password:"পাসওয়ার্ড",
+ o:[["Khalid Chat-এ স্বাগতম","কথা বলার আপনার নিজস্ব নিরাপদ জায়গা।"],["যাদের ভালোবাসেন তাদের সাথে চ্যাট করুন।","বন্ধু আর গ্রুপ, এক শান্ত জায়গায়।"],["আপনার AI সহকারীর সাথে পরিচিত হোন।","Khalid AI লিখতে, অনুবাদ করতে ও ভাবতে সাহায্য করে।"],["ব্যক্তিগত। সহজ। শক্তিশালী।","কে কী দেখবে, আপনি ঠিক করেন।"]],
+ next:"পরের",start:"শুরু করুন",skip:"বাদ দিন",login:"লগইন",register:"অ্যাকাউন্ট খুলুন",toReg:"নতুন? অ্যাকাউন্ট খুলুন",toLog:"অ্যাকাউন্ট আছে? লগইন করুন",reset:"পাসওয়ার্ড ভুলে গেছেন?",
+ resetSent:"রিসেট লিংক পাঠানো হয়েছে। ইমেইল দেখুন।",needEmail:"আগে ইমেইল লিখুন।",needAll:"সব ঘর পূরণ করুন।",badUser:"ইউজারনেম: ৩–২০টি ইংরেজি অক্ষর, সংখ্যা বা _।",taken:"এই ইউজারনেম নেওয়া হয়ে গেছে।",
+ tabs:["হোম","চ্যাট","কন্টাক্ট","AI","প্রোফাইল"],
+ eh:["এখনো কোনো কথোপকথন নেই","মেসেজিং পরের ভার্সনে আসছে।"],ec:["এখনো কোনো বন্ধু নেই","ফ্রেন্ড রিকোয়েস্ট পরের ভার্সনে আসছে।"],ea:["Khalid AI","AI সহকারী পরের ভার্সনগুলোতে আসছে।"],
+ edit:"প্রোফাইল এডিট",bio:"বায়ো",save:"পরিবর্তন সংরক্ষণ",saved:"সংরক্ষিত হয়েছে",theme:"থিম",light:"লাইট",dark:"ডার্ক",system:"সিস্টেম অনুযায়ী",lang:"ভাষা",logout:"লগআউট",
+ joined:"যোগ দিয়েছেন",settings:"সেটিংস",noBio:"এখনো বায়ো নেই।",
+ errs:{"auth/invalid-credential":"ইমেইল বা পাসওয়ার্ড ভুল।","auth/invalid-email":"ইমেইলটি সঠিক মনে হচ্ছে না।","auth/email-already-in-use":"এই ইমেইলে আগেই অ্যাকাউন্ট আছে।","auth/weak-password":"পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।","auth/network-request-failed":"ইন্টারনেট নেই। সংযোগ দেখুন।","auth/too-many-requests":"অনেকবার চেষ্টা হয়েছে। এক মিনিট পরে আবার চেষ্টা করুন।","auth/user-not-found":"এই ইমেইলে কোনো অ্যাকাউন্ট নেই।"},
+ generic:"কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।"}
+};
+const $=id=>document.getElementById(id);
+let lang=localStorage.getItem("kc_lang")||"bn",themePref=localStorage.getItem("kc_theme")||"system";
+const T=()=>L[lang];
+function applyTheme(){
+  const d=themePref==="dark"||(themePref==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.dataset.theme=d?"dark":"light";
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",applyTheme);
+const errText=e=>T().errs[e&&e.code]||T().generic;
+
+let user=null,profile=null,tab=0,oi=0,mode="login";
+function show(id){["onb","auth","app"].forEach(x=>$(x).classList.toggle("hide",x!==id))}
+function labels(){document.querySelectorAll("[data-t]").forEach(n=>n.textContent=T()[n.dataset.t]);document.documentElement.lang=lang}
+
+function renderOnb(){
+  const s=T().o[oi];$("oh").textContent=s[0];$("op").textContent=s[1];
+  $("dots").innerHTML=T().o.map((_,i)=>`<i class="${i===oi?"on":""}"></i>`).join("");
+  $("onext").textContent=oi===3?T().start:T().next;$("oskip").textContent=T().skip;
+  $("oskip").classList.toggle("hide",oi===3);
+}
+$("onext").onclick=()=>{if(oi<3){oi++;renderOnb()}else endOnb()};
+$("oskip").onclick=endOnb;
+function endOnb(){localStorage.setItem("kc_onb","1");show("auth");renderAuth()}
+
+function renderAuth(){
+  const reg=mode==="register";
+  $("ah").textContent=reg?T().register:T().login;
+  $("fn").classList.toggle("hide",!reg);$("fu").classList.toggle("hide",!reg);
+  $("asubmit").textContent=reg?T().register:T().login;
+  $("aswitch").textContent=reg?T().toLog:T().toReg;
+  $("areset").textContent=T().reset;$("areset").classList.toggle("hide",reg);
+  $("pass").autocomplete=reg?"new-password":"current-password";
+  $("amsg").textContent="";$("amsg").className="msg";labels();
+}
+function amsg(t,ok){$("amsg").textContent=t;$("amsg").className="msg "+(ok?"ok":"err")}
+$("aswitch").onclick=()=>{mode=mode==="login"?"register":"login";renderAuth()};
+$("areset").onclick=async()=>{
+  const e=$("email").value.trim();if(!e)return amsg(T().needEmail);
+  try{await sendPasswordResetEmail(auth,e);amsg(T().resetSent,true)}catch(x){amsg(errText(x))}
+};
+$("asubmit").onclick=async()=>{
+  const email=$("email").value.trim(),pass=$("pass").value,btn=$("asubmit");
+  if(!email||!pass)return amsg(T().needAll);
+  btn.disabled=true;amsg("");
+  try{
+    if(mode==="login"){await signInWithEmailAndPassword(auth,email,pass)}
+    else{
+      const name=$("name").value.trim(),un=$("uname").value.trim().toLowerCase().replace(/^@/,"");
+      if(!name)return amsg(T().needAll);
+      if(!/^[a-z0-9_]{3,20}$/.test(un))return amsg(T().badUser);
+      const cred=await createUserWithEmailAndPassword(auth,email,pass);
+      const ref=doc(db,"usernames",un);
+      try{
+        if((await getDoc(ref)).exists())throw{code:"taken"};
+        await setDoc(ref,{uid:cred.user.uid});
+      }catch(x){await deleteUser(cred.user);if(x.code==="taken")return amsg(T().taken);throw x}
+      await updateProfile(cred.user,{displayName:name});
+      await setDoc(doc(db,"users",cred.user.uid),{name,username:un,bio:"",createdAt:serverTimestamp()});
+    }
+  }catch(x){amsg(errText(x))}finally{btn.disabled=false}
+};
+
+onAuthStateChanged(auth,async u=>{
+  user=u;
+  if(!u){profile=null;if(localStorage.getItem("kc_onb")){show("auth");renderAuth()}else{show("onb");renderOnb()};return}
+  try{
+    const s=await getDoc(doc(db,"users",u.uid));
+    profile=s.exists()?s.data():{name:u.displayName||"",username:"",bio:""};
+  }catch(e){profile={name:u.displayName||"",username:"",bio:""}}
+  show("app");renderApp();
+});
+
+const ICON=[
+ '<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ '<path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/>',
+ '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 5a3.5 3.5 0 0 1 0 6M18 14.5a6 6 0 0 1 3.5 5.5"/>',
+ '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+ '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'];
+function renderApp(){
+  $("nav").innerHTML=T().tabs.map((n,i)=>`<button class="tab" ${i===tab?'aria-current="page"':""} data-i="${i}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[i]}</svg>${n}</button>`).join("");
+  $("nav").querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tab=+b.dataset.i;renderApp()});
+  const v=$("view");
+  if(tab===4){renderProfile(v);return}
+  const e=tab<2?T().eh:tab===2?T().ec:T().ea;
+  v.innerHTML=`<div class="empty"><h3>${e[0]}</h3><p>${e[1]}</p></div>`;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function renderProfile(v){
+  const p=profile,t=T(),n=p.name||user.email,d=user.metadata.creationTime?new Date(user.metadata.creationTime).toLocaleDateString(lang==="bn"?"bn-BD":"en-US",{year:"numeric",month:"long",day:"numeric"}):"";
+  v.innerHTML=`
+  <div class="card prof"><div class="avatar" aria-hidden="true">${esc(n.trim().charAt(0).toUpperCase())}</div>
+   <h2>${esc(n)}</h2><div class="un">${p.username?"@"+esc(p.username):""}</div>
+   <p class="bio">${p.bio?esc(p.bio):t.noBio}</p><p class="note" style="margin-top:8px">${t.joined}: ${d}</p></div>
+  <div class="card"><h3>${t.edit}</h3>
+   <label class="field"><span>${t.name}</span><input id="en" value="${esc(p.name||"")}" maxlength="40"></label>
+   <label class="field"><span>${t.bio}</span><textarea id="eb" rows="3" maxlength="140">${esc(p.bio||"")}</textarea></label>
+   <div class="msg" id="pm" role="status"></div><button class="btn" id="ps">${t.save}</button></div>
+  <div class="card"><h3>${t.settings}</h3>
+   <label class="field"><span>${t.theme}</span><select id="st"><option value="system">${t.system}</option><option value="light">${t.light}</option><option value="dark">${t.dark}</option></select></label>
+   <label class="field"><span>${t.lang}</span><select id="sl"><option value="bn">বাংলা</option><option value="en">English</option></select></label></div>
+  <button class="btn ghost" id="lo">${t.logout}</button>`;
+  $("st").value=themePref;$("sl").value=lang;
+  $("st").onchange=e=>{themePref=e.target.value;localStorage.setItem("kc_theme",themePref);applyTheme()};
+  $("sl").onchange=e=>{lang=e.target.value;localStorage.setItem("kc_lang",lang);labels();renderApp()};
+  $("lo").onclick=()=>signOut(auth);
+  $("ps").onclick=async()=>{
+    const name=$("en").value.trim(),bio=$("eb").value.trim(),m=$("pm");
+    if(!name){m.className="msg err";m.textContent=T().needAll;return}
+    try{
+      await updateDoc(doc(db,"users",user.uid),{name,bio});
+      await updateProfile(user,{displayName:name});
+      profile={...profile,name,bio};m.className="msg ok";m.textContent=T().saved;
+    }catch(e){m.className="msg err";m.textContent=T().generic}
+  };
+}
+
+applyTheme();labels();
+setTimeout(()=>$("splash").classList.add("hide"),1800);
+</script>
+</body>
+</html>
